@@ -25,3 +25,10 @@ Bills are bi-monthly; payment is by pre-authorized debit.
 3. Push `data/` + `docs/` to GitHub; the dashboard updates automatically (GitHub Pages, served from `docs/`).
 
 Same setup as the [Ioniq fuel tracker](https://github.com/ningzhibin/ioniq-fuel-tracker).
+
+## Auto-update
+
+New bills are picked up automatically: a daily check reads Gmail for new
+City of Ottawa e-bill notifications, appends them to `data/water-bills.csv`,
+rebuilds the dashboard (`build.py`) and pushes both files to GitHub
+(`update.py`; runs daily, ~09:00 ET). To update by hand: `python3 update.py`.
