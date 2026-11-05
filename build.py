@@ -85,7 +85,7 @@ HTML = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Water Bill Tracker — 3714 RIVERBREEZE ST, Ottawa</title>
+<title>Water Bill Tracker — City of Ottawa</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
 <style>
@@ -106,7 +106,7 @@ HTML = """<!DOCTYPE html>
 </head>
 <body>
 <h1>💧 Water Bill Tracker</h1>
-<p class="sub">City of Ottawa water utility bills for 3714 RIVERBREEZE ST, Ottawa — every e-bill notification since Dec 2021. Pre-authorized debit; each bill covers about two months. Updated <span id="updated"></span>.</p>
+<p class="sub">City of Ottawa water utility bills — every e-bill notification since Dec 2021. Pre-authorized debit; each bill covers about two months. Updated <span id="updated"></span>.</p>
 
 <div class="cards" id="cards"></div>
 
