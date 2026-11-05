@@ -1,6 +1,6 @@
-# Water Bill Tracker — 3714 RIVERBREEZE ST, Ottawa
+# Water Bill Tracker — City of Ottawa
 
-Every City of Ottawa water utility e-bill for 3714 RIVERBREEZE ST, tracked since December 2021.
+Every City of Ottawa water utility e-bill, tracked since December 2021.
 
 Dashboard: https://ningzhibin.github.io/water-bill-tracker/
 
