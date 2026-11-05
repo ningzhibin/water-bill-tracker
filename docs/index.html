@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Water Bill Tracker — 3714 RIVERBREEZE ST, Ottawa</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  body{font-family:-apple-system,system-ui,"Segoe UI",Roboto,sans-serif;max-width:980px;margin:0 auto;padding:20px;color:#222;background:#fafafa}
+  h1{font-size:1.6em;margin-bottom:0} .sub{color:#666;margin:4px 0 20px}
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+  .card{background:#fff;border:1px solid #e3e3e3;border-radius:10px;padding:12px 14px}
+  .card .v{font-size:1.5em;font-weight:700} .card .l{color:#666;font-size:.85em}
+  .chart{background:#fff;border:1px solid #e3e3e3;border-radius:10px;padding:14px;margin:18px 0}
+  .chart h2{font-size:1.1em;margin:0 0 4px} .chart p{color:#666;font-size:.88em;margin:0 0 10px}
+  canvas{max-height:340px}
+  table{width:100%;border-collapse:collapse;font-size:.85em;background:#fff}
+  th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:right}
+  th:first-child,td:first-child{text-align:left}
+  footer{color:#888;font-size:.8em;margin-top:24px}
+  a{color:#1a73e8}
+</style>
+</head>
+<body>
+<h1>💧 Water Bill Tracker</h1>
+<p class="sub">City of Ottawa water utility bills for 3714 RIVERBREEZE ST, Ottawa — every e-bill notification since Dec 2021. Pre-authorized debit; each bill covers about two months. Updated <span id="updated"></span>.</p>
+
+<div class="cards" id="cards"></div>
+
+<div class="chart"><h2>Amount per bill</h2>
+<p>Each dot is one bi-monthly bill (CAD). The line is a 3-bill rolling average — trend: <b id="slope"></b> per year.</p>
+<canvas id="c1"></canvas></div>
+
+<div class="chart"><h2>Yearly averages</h2>
+<p>Mean bill amount per calendar year.</p>
+<canvas id="c2"></canvas></div>
+
+<div class="chart"><h2>All bills</h2>
+<table><thead><tr><th>Bill date</th><th>Amount (CAD)</th><th>Due date</th></tr></thead>
+<tbody id="recent"></tbody></table></div>
+
+<footer>Data: City of Ottawa e-bill notification emails (amount due + due date only — the emails do not include consumption in m³ or the water/sewer split; those live in the full bill on My ServiceOttawa). Account number intentionally not published. Analysis: automatic ·
+<a href="https://github.com/ningzhibin/water-bill-tracker">Source &amp; raw CSV on GitHub</a></footer>
+
+<script>
+const D = {"records": [{"date": "2021-12-01", "amount": 108.33, "due": "2021-12-17"}, {"date": "2022-02-01", "amount": 108.33, "due": "2022-02-22"}, {"date": "2022-03-31", "amount": 114.83, "due": "2022-04-22"}, {"date": "2022-05-27", "amount": 122.2, "due": "2022-06-15"}, {"date": "2022-07-28", "amount": 122.92, "due": "2022-08-15"}, {"date": "2022-09-24", "amount": 126.28, "due": "2022-10-11"}, {"date": "2022-11-25", "amount": 119.56, "due": "2022-12-13"}, {"date": "2023-01-25", "amount": 119.56, "due": "2023-02-10"}, {"date": "2023-03-24", "amount": 119.56, "due": "2023-04-12"}, {"date": "2023-05-25", "amount": 130.54, "due": "2023-06-12"}, {"date": "2023-07-21", "amount": 138.68, "due": "2023-08-09"}, {"date": "2023-09-20", "amount": 131.78, "due": "2023-10-06"}, {"date": "2023-11-17", "amount": 140.01, "due": "2023-12-05"}, {"date": "2024-01-18", "amount": 133.9, "due": "2024-02-05"}, {"date": "2024-03-19", "amount": 135.23, "due": "2024-04-05"}, {"date": "2024-05-17", "amount": 112.86, "due": "2024-06-06"}, {"date": "2024-07-19", "amount": 134.55, "due": "2024-08-07"}, {"date": "2024-09-19", "amount": 141.63, "due": "2024-10-07"}, {"date": "2024-11-19", "amount": 141.63, "due": "2024-12-05"}, {"date": "2025-01-16", "amount": 141.63, "due": "2025-02-04"}, {"date": "2025-03-15", "amount": 134.55, "due": "2025-04-03"}, {"date": "2025-05-16", "amount": 141.87, "due": "2025-06-04"}, {"date": "2025-07-12", "amount": 144.71, "due": "2025-07-31"}, {"date": "2025-09-12", "amount": 148.33, "due": "2025-10-02"}, {"date": "2025-11-10", "amount": 137.47, "due": "2025-11-27"}, {"date": "2026-01-10", "amount": 134.4, "due": "2026-01-29"}, {"date": "2026-03-11", "amount": 138.02, "due": "2026-03-30"}, {"date": "2026-05-08", "amount": 145.0, "due": "2026-05-27"}, {"date": "2026-07-08", "amount": 148.25, "due": "2026-07-27"}, {"date": "2026-09-04", "amount": 152.01, "due": "2026-09-22"}, {"date": "2026-11-05", "amount": 155.77, "due": "2026-11-24"}], "stats": {"bills": 31, "span": "2021-12-01 \u2192 2026-11-05", "total": 4124.39, "avg": 133.04, "latest": 155.77, "latest_due": "2026-11-24", "lowest": 108.33, "highest": 155.77, "slope_yr": 7.24}, "yearly": {"2021": 108.33, "2022": 119.02, "2023": 130.02, "2024": 133.3, "2025": 141.43, "2026": 145.57}, "yearly_count": {"2021": 1, "2022": 6, "2023": 6, "2024": 6, "2025": 6, "2026": 6}, "rolling": [{"date": "2021-12-01", "v": 108.33}, {"date": "2022-02-01", "v": 108.33}, {"date": "2022-03-31", "v": 110.5}, {"date": "2022-05-27", "v": 115.12}, {"date": "2022-07-28", "v": 119.98}, {"date": "2022-09-24", "v": 123.8}, {"date": "2022-11-25", "v": 122.92}, {"date": "2023-01-25", "v": 121.8}, {"date": "2023-03-24", "v": 119.56}, {"date": "2023-05-25", "v": 123.22}, {"date": "2023-07-21", "v": 129.59}, {"date": "2023-09-20", "v": 133.67}, {"date": "2023-11-17", "v": 136.82}, {"date": "2024-01-18", "v": 135.23}, {"date": "2024-03-19", "v": 136.38}, {"date": "2024-05-17", "v": 127.33}, {"date": "2024-07-19", "v": 127.55}, {"date": "2024-09-19", "v": 129.68}, {"date": "2024-11-19", "v": 139.27}, {"date": "2025-01-16", "v": 141.63}, {"date": "2025-03-15", "v": 139.27}, {"date": "2025-05-16", "v": 139.35}, {"date": "2025-07-12", "v": 140.38}, {"date": "2025-09-12", "v": 144.97}, {"date": "2025-11-10", "v": 143.5}, {"date": "2026-01-10", "v": 140.07}, {"date": "2026-03-11", "v": 136.63}, {"date": "2026-05-08", "v": 139.14}, {"date": "2026-07-08", "v": 143.76}, {"date": "2026-09-04", "v": 148.42}, {"date": "2026-11-05", "v": 152.01}], "updated": "2026-11-05"};
+document.getElementById('updated').textContent = D.updated;
+const s = D.stats;
+const cards = [
+  ['$' + s.latest.toFixed(2), 'latest bill, due ' + s.latest_due],
+  ['$' + s.avg.toFixed(2), 'average per bill'],
+  ['$' + s.total.toLocaleString(), 'total paid (' + s.bills + ' bills)'],
+  [s.bills + ' bills', s.span],
+  ['$' + s.lowest.toFixed(2) + ' – $' + s.highest.toFixed(2), 'lowest – highest'],
+];
+document.getElementById('cards').innerHTML = cards.map(c =>
+  `<div class="card"><div class="v">${c[0]}</div><div class="l">${c[1]}</div></div>`).join('');
+document.getElementById('slope').textContent = (s.slope_yr >= 0 ? '+$' : '−$') + Math.abs(s.slope_yr).toFixed(2);
+
+const pts = D.records.map(r => ({x: r.date, y: r.amount}));
+new Chart(document.getElementById('c1'), {type: 'scatter',
+  data: {datasets: [
+    {label: 'per bill', data: pts, pointRadius: 3, backgroundColor: '#1a73e880'},
+    {label: '3-bill rolling avg', type: 'line', data: D.rolling.map(p => ({x: p.date, y: p.v})),
+     borderColor: '#0288d1', borderWidth: 2, pointRadius: 0, tension: 0.2}]},
+  options: {scales: {x: {type: 'time', time: {unit: 'year'}}, y: {title: {display: true, text: 'CAD'}}}, plugins: {legend: {display: true}}}});
+
+const years = Object.keys(D.yearly);
+new Chart(document.getElementById('c2'), {type: 'bar',
+  data: {labels: years, datasets: [{data: years.map(k => D.yearly[k]),
+    backgroundColor: '#4fc3f7'}]},
+  options: {scales: {y: {title: {display: true, text: 'CAD'}}}, plugins: {legend: {display: false}}}});
+
+document.getElementById('recent').innerHTML = D.records.slice().reverse().map(r =>
+  `<tr><td>${r.date}</td><td>$${r.amount.toFixed(2)}</td><td>${r.due}</td></tr>`).join('');
+</script>
+</body>
+</html>
